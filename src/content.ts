@@ -20,7 +20,7 @@ export type Question = {
   title: string;
   /** The post, ad or headline the user looks at. */
   artifact: string;
-  /** What the user should try before answering. */
+  /** What the user can try before answering (optional). */
   task: string;
   prompt: string;
   options: [string, string, string, string];
@@ -30,8 +30,6 @@ export type Question = {
   feedback: string;
   trick: Trick;
   mechanic: Mechanic;
-  /** Answering is locked until exploration[key] >= min. */
-  gate?: { key: string; min: number; hint: string };
 };
 
 export const levels = [
@@ -67,7 +65,6 @@ export const questions: Question[] = [
       how: 'Emotional words make a small fact feel like a big event.',
       defend: 'Say the headline again in calm words. Is it still big news?',
     },
-    gate: { key: 'changes', min: 2, hint: 'Change at least two things in the headline first.' },
   },
   {
     id: 'Q02', level: 1, mechanic: 'framing',
@@ -120,7 +117,6 @@ export const questions: Question[] = [
       how: 'Real words are cut out of a longer sentence, so the meaning changes.',
       defend: 'Find the full quote or the video before you trust a short one.',
     },
-    gate: { key: 'full', min: 1, hint: 'Show the full quote first.' },
   },
   {
     id: 'Q04', level: 1, mechanic: 'crowd',
@@ -147,7 +143,6 @@ export const questions: Question[] = [
       how: 'The photographer chooses what stays inside the frame and what stays outside.',
       defend: 'Ask what is outside the frame. Look for a wide photo or a real count.',
     },
-    gate: { key: 'wide', min: 1, hint: 'Zoom all the way out first.' },
   },
 
   // ───────────── Level 2 — The Number Trap ─────────────
@@ -202,7 +197,6 @@ export const questions: Question[] = [
       how: 'A zoomed axis, a hand-picked period or a percentage can make a small change look huge.',
       defend: 'Read the axis numbers and ask: why does the chart start here, and at this date?',
     },
-    gate: { key: 'changes', min: 2, hint: 'Use at least two controls first.' },
   },
   {
     id: 'Q07', level: 2, mechanic: 'average',
@@ -229,7 +223,6 @@ export const questions: Question[] = [
       how: 'One extreme value can move the average far away from what is typical.',
       defend: 'Ask for the median or the typical value, not only the average.',
     },
-    gate: { key: 'billionaire', min: 1, hint: 'Let the billionaire in first.' },
   },
   {
     id: 'Q08', level: 2, mechanic: 'size',
@@ -284,7 +277,6 @@ export const questions: Question[] = [
       how: 'A timer or “only 2 left” makes you hurry, so you stop comparing.',
       defend: 'Close the page for ten minutes. A real deal will still be there.',
     },
-    gate: { key: 'reloads', min: 1, hint: 'Reload the page at least once first.' },
   },
   {
     id: 'Q10', level: 3, mechanic: 'anchor',
@@ -342,7 +334,7 @@ export const questions: Question[] = [
     id: 'Q12', level: 3, mechanic: 'combo',
     title: 'The family chat',
     artifact: 'A message forwarded many times in your family chat.',
-    task: 'Tap the parts that try to push you. Find at least three tricks.',
+    task: 'Tap the parts that try to push you. How many tricks can you find?',
     prompt: 'What is the best first step?',
     options: [
       'Share it with everyone in the chat. Better safe than sorry.',
@@ -363,7 +355,6 @@ export const questions: Question[] = [
       how: 'Fear, secrets, urgency and “us vs them” work together to make you act fast.',
       defend: 'Ask: what does this message want me to do, and who benefits?',
     },
-    gate: { key: 'found', min: 3, hint: 'Find at least three tricks in the message first.' },
   },
 ];
 

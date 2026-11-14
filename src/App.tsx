@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { levels, questions, stopChecklist } from './content';
 import type { Question } from './content';
 import { Visual } from './mechanics';
-import { afterReview, endsLevel, gateOpen, isComplete } from './navigation';
+import { afterReview, endsLevel, isComplete } from './navigation';
 import { makeAnswer, recommendations, scoreAnswers, scoreLevel, tier, trickReport } from './scoring';
 import type { Answers } from './scoring';
 import { freshState, loadState, saveState } from './storage';
@@ -23,9 +23,12 @@ export function App() {
   useEffect(() => {
     if (!problem) saveState(s);
   }, [s, problem]);
+  // Scroll to the top on a new page, but not when an answer is checked:
+  // the feedback appears under the answers, where the user already is.
+  const page = s.screen === 'feedback' ? 'question' : s.screen;
   useEffect(() => {
     window.scrollTo({ top: 0 });
-  }, [s.screen, s.currentQuestionIndex, reviewIndex]);
+  }, [page, s.currentQuestionIndex, reviewIndex]);
 
   const update = (patch: Partial<State>) => setS((old) => ({ ...old, ...patch }));
   const q = questions[s.currentQuestionIndex];
@@ -48,7 +51,7 @@ export function App() {
   const explore = (key: string, value: number) =>
     setS((old) => ({ ...old, exploration: { ...old.exploration, [q.id]: { ...old.exploration[q.id], [key]: value } } }));
   const submit = () => {
-    if (s.draftAnswer === null || answers[q.id] || !gateOpen(q, s.exploration[q.id])) return;
+    if (s.draftAnswer === null || answers[q.id]) return;
     update({ screen: 'feedback', submittedAnswersByQuestionId: { ...answers, [q.id]: makeAnswer(q.id, s.draftAnswer) } });
   };
   const leaveReview = () => {
@@ -105,8 +108,7 @@ export function App() {
               <Options q={q} draft={s.draftAnswer} answers={answers} locked={s.screen === 'feedback'} onPick={(i) => update({ draftAnswer: i })} />
               {s.screen === 'question' ? (
                 <>
-                  <button className="primary full" disabled={s.draftAnswer === null || !gateOpen(q, s.exploration[q.id])} onClick={submit}>Check answer <span>↗</span></button>
-                  {!gateOpen(q, s.exploration[q.id]) && <p className="helper">{q.gate?.hint}</p>}
+                  <button className="primary full" disabled={s.draftAnswer === null} onClick={submit}>Check answer <span>↗</span></button>
                 </>
               ) : (
                 <Feedback q={q} answers={answers} onNext={next} isLast={s.currentQuestionIndex === TOTAL - 1} />
