@@ -166,3 +166,11 @@
   .gl-row { grid-template-columns: 1fr; gap: 0; }
   .risk-bars { gap: 24px; }
 }
+
+/* Mobile: show the question above the interaction, so players know what they will be asked */
+.mobile-prompt { display: none; }
+@media (max-width: 760px) {
+  .mobile-prompt { display: block; font-size: 14px; line-height: 1.5; color: #234a3b; background: #fbfaf5; border: 1px solid #d0d5cb; padding: 10px 12px; margin: 0 0 12px; }
+  .mobile-prompt button { display: inline; border: 0; background: none; padding: 0 0 0 4px; color: #b25a3c; font-weight: 700; font-size: 13px; text-decoration: underline; }
+  .answer-section { scroll-margin-top: 12px; }
+}

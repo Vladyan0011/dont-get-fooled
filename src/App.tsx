@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { levels, questions, stopChecklist } from './content';
 import type { Question } from './content';
 import { Visual } from './mechanics';
@@ -30,6 +30,17 @@ export function App() {
     window.scrollTo({ top: 0 });
   }, [page, s.currentQuestionIndex, reviewIndex]);
 
+  // After "Check answer", gently bring the explanation into view if it starts low on the screen.
+  const justChecked = useRef(false);
+  useEffect(() => {
+    if (s.screen !== 'feedback' || !justChecked.current) return;
+    justChecked.current = false;
+    const top = document.querySelector('.feedback')?.getBoundingClientRect().top;
+    if (top === undefined || top < window.innerHeight * 0.55) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    window.scrollBy({ top: top - window.innerHeight * 0.2, behavior: reduce ? 'auto' : 'smooth' });
+  }, [s.screen]);
+
   const update = (patch: Partial<State>) => setS((old) => ({ ...old, ...patch }));
   const q = questions[s.currentQuestionIndex];
   const answers = s.submittedAnswersByQuestionId;
@@ -50,8 +61,10 @@ export function App() {
   };
   const explore = (key: string, value: number) =>
     setS((old) => ({ ...old, exploration: { ...old.exploration, [q.id]: { ...old.exploration[q.id], [key]: value } } }));
+  const toAnswers = () => document.getElementById('answers')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const submit = () => {
     if (s.draftAnswer === null || answers[q.id]) return;
+    justChecked.current = true;
     update({ screen: 'feedback', submittedAnswersByQuestionId: { ...answers, [q.id]: makeAnswer(q.id, s.draftAnswer) } });
   };
   const leaveReview = () => {
@@ -101,8 +114,11 @@ export function App() {
             <span className="heading-num">{pad(s.currentQuestionIndex + 1)}</span>
           </div>
           <div className="game-layout">
-            <section><Visual key={q.id} q={q} exploration={s.exploration[q.id]} onExplore={explore} /></section>
-            <section className="answer-section">
+            <section>
+              <p className="mobile-prompt"><b>Question:</b> {q.prompt} <button type="button" onClick={toAnswers}>Go to answers ↓</button></p>
+              <Visual key={q.id} q={q} exploration={s.exploration[q.id]} onExplore={explore} />
+            </section>
+            <section className="answer-section" id="answers">
               <p className="eyebrow">YOUR TURN</p>
               <h2>{q.prompt}</h2>
               <Options q={q} draft={s.draftAnswer} answers={answers} locked={s.screen === 'feedback'} onPick={(i) => update({ draftAnswer: i })} />
@@ -168,7 +184,7 @@ function Landing({ onStart }: { onStart: () => void }) {
         <p className="landing-sub">Every post is selling something.</p>
         <p className="intro">An idea, a feeling, or an action. In 12 short challenges you will use real manipulation tricks yourself — and learn to see them in your own feed.</p>
         <button className="primary" onClick={onStart}>Start the quiz <span>↗</span></button>
-        <div className="meta"><span><b>12</b> challenges</span><span><b>03</b> traps</span><span><b>7–10</b> minutes</span></div>
+        <div className="meta"><span><b>12</b> challenges</span><span><b>03</b> traps</span><span><b>10–15</b> minutes</span></div>
         <ol className="trap-list">
           {levels.map((l, i) => <li key={l.name}><b>{pad(i + 1)} {l.name}</b> — {l.goal}</li>)}
         </ol>
